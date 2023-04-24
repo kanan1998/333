@@ -1,11 +1,11 @@
-from datetime import datetime
+#from datetime import datetime
 
-from django import template
-
-
-register = template.Library()
+#from django import template
 
 
-@register.simple_tag()
-def current_time(format_string='%b %d %Y'):
-   return datetime.utcnow().strftime(format_string)
+#register = template.Library()
+
+
+#@register.simple_tag()
+#def current_time(format_string='%b %d %Y'):
+#   return datetime.utcnow().strftime(format_string)
