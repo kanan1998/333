@@ -7,6 +7,20 @@ from django.db.models import Sum
 PREVIEW_LEN = 124
 
 
+class News(models.Model):
+    CATEGORIES_CHOICES = [('uncos', 'Новости'), ('articles', 'Статьи')]
+
+    title = models.CharField(max_length=255, verbose_name='Заголовок')
+    content = models.TextField()
+    text = models.TextField()
+    category = models.CharField(max_length=10, choices=CATEGORIES_CHOICES, default='uncos')
+    data_pub = models.DateField(auto_now_add=True)
+
+    def get_absolute_url(self):
+        return reverse('detail', kwargs={'pk': self.pk})
+
+    def __str__(self):
+        return '{}'.format(self.title)
 class Author(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     author_name = models.CharField(max_length=128)
@@ -93,3 +107,4 @@ class Comment(models.Model):
 
     def __str__(self):
         return f'id={self.id}, rating={self.rating}'
+

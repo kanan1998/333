@@ -35,9 +35,9 @@ def preview(value):
     else:
         return value
 
-@register.simple_tag()
-def current_time(format_string='%b %d %Y'):
-   return datetime.utcnow().strftime(format_string)
+#@register.simple_tag()
+#def current_time(format_string='%b %d %Y'):
+#   return datetime.utcnow().strftime(format_string)
 
 
 if __name__ == '__main__':
