@@ -1,129 +1,63 @@
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from django.shortcuts import render
-from .models import News, Author
-from datetime import datetime
-from django.urls import reverse_lazy
-from .filters import NewsFilter
-
-class AuthorsList(ListView):
-    model = Author
-    template_name = 'authors.html'
-    context_object_name = 'authors'
-
-    def get_queryset(self):
-        return Author.objects.all()
+from django.shortcuts import render, redirect
+from django.views.generic import ListView, DetailView, UpdateView, DeleteView
+from .models import Record
+from .filters import RecordFilter
+from .forms import RecordForm
 
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['time_now'] = datetime.utcnow()  # добавим переменную текущей даты time_now
-        context['value1'] = None  # добавим ещё одну пустую переменную, чтобы на её примере посмотреть работу другого фильтра
-        return context
+class NewsList(ListView):                   # Класс, который наследуется от ListView
+    model = Record                          # Указываем модель, объекты которой мы будем выводить
+    ordering = ['-data']                    # Поле, которое будет использоваться для сортировки объектов
+    template_name = 'news/news_home.html'   # Указываем имя шаблона. С инструкциями о том, как показать объекты юзеру
+    context_object_name = 'record'          # Имя списка содержит все объекты. Его указать, для обр.к объектам в html
+    paginate_by = 10                        # указываем количество записей на странице
 
 
-class AuthorDetail(DetailView):
-    model = Author
-    template_name = 'author.html'
-    context_object_name = 'author'
-
-
-class NewsListView(ListView):
-    model = News
-    template_name = 'default.html'
-    context_object_name = 'news'
-    ordering = ['-data_pub']
+class SearchList(ListView):
+    model = Record
+    ordering = ['-data']
+    template_name = 'news/search.html'
+    context_object_name = 'record'
     paginate_by = 10
 
-
-class NewDetailView(DetailView):
-    model = News
-    template_name = 'detail.html'
-    context_object_name = 'new'
-
-
-class UncosNewsListView(ListView):
-    model = News
-    template_name = 'uncos.html'
-    context_object_name = 'news'
-    ordering = ['-data_pub']
-    paginate_by = 10
+    def get_filter(self):
+        return RecordFilter(self.request.GET, queryset=super().get_queryset())
 
     def get_queryset(self):
-        return super().get_queryset().filter(category='uncos')
+        return self.get_filter().qs  # Возвращает get_filter в который мы применяя qs для получения queryset
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        paginator = context['paginator']
-        current_page = context['page_obj']
-        start_index = max(current_page.number - 2, 1)
-        end_index = min(current_page.number + 2, paginator.num_pages)
-        page_range = range(start_index, end_index + 1)
-        context['page_range'] = page_range
-        return context
+    def get_context_data(self, *args, **kwargs):  # для работы в шаблоне, переназначаем метод get_context_data
+        return {**super().get_context_data(*args, **kwargs), 'filter': self.get_filter(), }
+            # переменная filter будет использоваться в шаблоне
 
 
-class ArticlesNewsListView(ListView):
-    model = News
-    template_name = 'articles.html'
-    context_object_name = 'news'
-    ordering = ['-data_pub']
-    paginate_by = 10
-
-    def get_queryset(self):
-        return super().get_queryset().filter(category='articles')
+class NewsId(DetailView):
+    model = Record
+    template_name = 'news/news_id.html'
+    context_object_name = 'record'
 
 
-class NewsSearchView(ListView):
-    model = News
-    template_name = 'news_search.html'
-    context_object_name = 'news'
-    ordering = ['-data_pub']
-    paginate_by = 10
-
-    def get_queryset(self):
-        query = self.request.GET.get('q')
-        if query:
-            return News.objects.filter(title__icontains=query)
-        return News.objects.all()
+class NewsUpdataView(UpdateView):
+    model = Record
+    template_name = 'news/create.html'
+    form_class = RecordForm             # Для формы обновления, используем уже созданный класс RecordForm из form.py
 
 
-def news_search(request):
-    news_list = News.objects.all()
-    news_filter = NewsFilter(request.GET, queryset=news_list)
-    return render(request, 'news_search.html', {'filter': news_filter, 'news_list': news_filter.qs})
+class NewsDeleteView(DeleteView):
+    model = Record
+    template_name = 'news/news_delete.html'
+    success_url = '/news/'
 
 
-class UncosCreateView(CreateView):
-    model = News
-    fields = ['title', 'text', 'category']
-    template_name = 'news_form.html'
-
-
-class UncosUpdateView(UpdateView):
-    model = News
-    fields = ['title', 'text', 'category']
-    template_name = 'news_edit.html'
-
-
-class UncosDeleteView(DeleteView):
-    model = News
-    success_url = reverse_lazy('index')
-    template_name = 'news_confirm_delete.html'
-
-
-class ArticlesCreateView(CreateView):
-    model = News
-    fields = ['title', 'text', 'category']
-    template_name = 'articles_form.html'
-
-
-class ArticlesUpdateView(UpdateView):
-    model = News
-    fields = ['title', 'text', 'category']
-    template_name = 'articles_edit.html'
-
-
-class ArticlesDeleteView(DeleteView):
-    model = News
-    success_url = reverse_lazy('articles')
-    template_name = 'articles_confirm_delete.html'
+def create(request):
+    error = ''
+    if request.method == 'POST':
+        form = RecordForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('news_home')
+        else:
+            error = 'Описание не может быть менее 20 символов.'
+    form = RecordForm()
+    data = {'form': form, 'error': error}  # объект form будет передаваться в шаблон search.html
+    return render(request, 'news/create.html', data)

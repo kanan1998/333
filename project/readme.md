@@ -1,10 +1,10 @@
 Django project "News Portal"
 
-News creation http://127.0.0.1:8000/news/uncos/create/
+News creation http://127.0.0.1:8000/news/news/create/
 
-News editing http://127.0.0.1:8000/news/uncos/id/edit/
+News editing http://127.0.0.1:8000/news/news/id/edit/
 
-Deleting news http://127.0.0.1:8000/news/uncos/id/delete/
+Deleting news http://127.0.0.1:8000/news/news/id/delete/
 
 Article creation http://127.0.0.1:8000/news/articles/create/
 

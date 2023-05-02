@@ -1,19 +1,13 @@
 from django.urls import path
-from .views import *
-urlpatterns = [
-    path('authors/', AuthorsList.as_view()),
-    path('authors/<int:pk>', AuthorDetail.as_view()),  # pk — это первичный ключ товара, который будет выводиться у нас в шаблон
-    path('', NewsListView.as_view(template_name='index.html'), name='index'),
-    path('<int:pk>/', NewDetailView.as_view(), name='detail'),
-    path('uncos/', UncosNewsListView.as_view(), name='uncos'),
-    path('articles/', ArticlesNewsListView.as_view(), name='articles'),
-    path('news/', NewsSearchView.as_view(), name='news'),
-    path('search/', news_search, name='news_search'),
+from . import views  # импортируем файлик wiews.py со всеми представлениями (классами и методами)
 
-    path('uncos/create/', UncosCreateView.as_view(), name='uncos_create'),
-    path('uncos/<int:pk>/edit/', UncosUpdateView.as_view(), name='uncos_edit'),
-    path('uncos/<int:pk>/delete/', UncosDeleteView.as_view(), name='uncos_delete'),
-    path('articles/create/', ArticlesCreateView.as_view(), name='articles_create'),
-    path('articles/<int:pk>/edit/', ArticlesUpdateView.as_view(), name='articles_edit'),
-    path('articles/<int:pk>/delete/', ArticlesDeleteView.as_view(), name='articles_delete'),
+# Т.к. наше объявленное представление является классом, а Django ожидает функцию, нам надо представить этот класс в
+# виде view. Для этого вызываем метод as_view.
+urlpatterns = [
+    path('', views.NewsList.as_view(), name='news_home'),
+    path('<int:pk>', views.NewsId.as_view(), name='news_id'),  # переход по динамическим страницам
+    path('create/', views.create, name='create'),  # переход на страницу добавления записи
+    path('search/', views.SearchList.as_view(), name='search'),
+    path('<int:pk>/updata', views.NewsUpdataView.as_view(), name='news_updata'),
+    path('<int:pk>/delete', views.NewsDeleteView.as_view(), name='news_delete'),
 ]
