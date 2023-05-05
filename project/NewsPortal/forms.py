@@ -16,8 +16,8 @@ class RecordForm(ModelForm):
         widgets = {
             'title': TextInput(attrs={'class': 'form-control', 'placeholder': 'Название публикации'}),
             'data': DateTimeInput(attrs={'type': 'date', 'class': 'form-control', 'placeholder': 'Дата публикации'}),
-            'full_text': Textarea(attrs={'class': 'form-control', 'placeholder': 'Текст публикации'}),
-            'category__title': TextInput(attrs={'class': 'form-control', 'placeholder': 'Категория'})
+            #'full_text': Textarea(attrs={'class': 'form-control', 'placeholder': 'Текст публикации'}),
+            #'category__title': TextInput(attrs={'class': 'form-control', 'placeholder': 'Категория'})
         }
 
     def clean(self):
